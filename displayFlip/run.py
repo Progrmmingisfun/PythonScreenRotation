@@ -1,0 +1,25 @@
+# simply flips the display if this is specified over serial or bluetooth
+import os
+import sys
+from CommunicationFactory import CommunicationFactory
+
+usageType = sys.argv[1]
+if usageType not in ['bluetooth', 'serial']:
+    raise Exception("The first argument is the usage type (bluetooth or serial)")
+endpoint = sys.argv[2]
+reversed = bool(int(sys.argv[3]))
+
+def switch_display(to, parameters):
+    reversed = parameters['reversed']
+    if to == "0":
+        os.system("xrandr-extend vga -o --rotate normal")
+    elif (to == "1" and not reversed) or (to == "2" and reversed):
+        os.system("xrandr-extend vga  -o --rotate right")
+    elif (to == "1" and reversed) or (to == "2" and not reversed):
+        os.system("xrandr-extend vga -o --rotate left")
+
+communicator = CommunicationFactory.create_communicator(usageType)
+communicator.set_endpoint(endpoint)
+communicator.set_callback(switch_display)
+communicator.set_extra_parameters({'reversed': reversed})
+communicator.listen()
